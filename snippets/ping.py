@@ -4,7 +4,7 @@ import subprocess
 
 def is_online(host):
     os_name = platform.system()
-    
+
     if os_name == 'Windows':
         ping_args = ['ping', '-n', '1', '-w', '500', host]
     else:
@@ -16,12 +16,14 @@ def is_online(host):
         raise Exception('Failed to ping host {}'.format(host))
 
     output = output.decode('utf-8')
-    if "Destination host unreachable" in output:
-        print(host, "is Offline")
-        return False
-    elif "Request timed out" in output:
-        print(host, "is Offline")
-        return False
-    else:
-        print(host, "is Online")
-        return True
+
+    fail_messages = ["Destination host unreachable", "Request timed out", "100% loss",
+                     "Destination Host Unreachable", "100% packet loss"]
+
+    for fail_message in fail_messages:
+        if fail_message in output:
+            print(host, "is Offline")
+            return False
+
+    print(host, "is Online")
+    return True
